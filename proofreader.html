@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+  <title>HOCR Proofreader</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <script>
+/* TODO:
+ * - BUG: ampersands in input boxes are represented as &amp;
+ * - Have the input box move to the next word when the right is pressed at the end of a word
+ * - Automatically generate the hocr style; https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Using_dynamic_styling_information
+ * - Style this generally
+ * - Load image for side-by-side view
+ * - Show word & character recognised from image when editing a character
+ */
+
+/* process the edit and update the word title to 'corrected' */
+function edited(event) {
+	var p;
+
+	/* may be null if this has already been updated (e.g. if it's called more than once) */
+	if(this.parentNode == null ||
+	   (p = this.parentNode.parentNode) == null) {
+		return;
+	}
+
+	if(!p.title.includes("corrected")) {
+		p.title += "; corrected";
+	}
+
+	/* Don't advance automatically if the box is large or empty */
+	if(this.value.length != 1) {
+		return;
+	}
+
+	next(this);
+}
+
+/* key handler for character edit box */
+function charkeys(event) {
+	/* WebKit uses deprecated keyCode, which has different semantics to key,
+	 * unfortunately. Support both for now */
+
+	if(event.shiftKey) {
+		if(event.key && event.key == "ArrowRight" ||
+		   event.keyCode && event.keyCode == 39) {
+			next(this);
+		}
+		if(event.key && event.key == "ArrowLeft" ||
+		   event.keyCode && event.keyCode == 37) {
+			prev(this);
+		}
+		return;
+	}
+
+/*
+	if(event.key && event.key == "ArrowRight" ||
+	   event.keyCode && event.keyCode == 39) {
+		next(this);
+	}
+
+	if(event.key && event.key == "ArrowLeft" ||
+	   event.keyCode && event.keyCode == 37) {
+		prev(this);
+	}
+*/
+	if(event.key && event.key == "ArrowDown" ||
+	   event.keyCode && event.keyCode == 40) {
+		down(this);
+	}
+	if(event.key && event.key == "ArrowUp" ||
+	   event.keyCode && event.keyCode == 38) {
+		up(this);
+	}
+}
+
+function nextchar(input) {
+	input.selectionStart++;
+}
+
+function prevchar(input) {
+	input.selectionStart--;
+}
+
+/* open input box for the next character and close input box for current character */
+function next(c) {
+	var e;
+	var p;
+
+	if((p = c.parentNode.nextSibling.nextSibling) == null) {
+		return;
+	}
+
+	/* dispatch 'click' event to open the next input box */
+	e = new Event("click");
+	p.dispatchEvent(e);
+
+	/* dispatch 'input' event to close the current input box */
+	e = new Event("input");
+	c.dispatchEvent(e);
+}
+
+/* open input box for the previous character and close input box for current character */
+function prev(c) {
+	var e;
+	var p;
+
+	/* dispatch 'click' event to open the next input box */
+	if((p = c.parentNode.previousSibling.previousSibling) != null) {
+		e = new Event("click");
+		p.dispatchEvent(e);
+	}
+
+	/* dispatch 'input' event to close the current input box */
+	e = new Event("input");
+	c.dispatchEvent(e);
+}
+
+function down(c) {
+	var e;
+	var p;
+
+	// ugly magic right here
+	if((p = c.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling) == null) {
+		return;
+	}
+
+	/* dispatch 'click' event to open the next input box */
+	e = new Event("click");
+	p.dispatchEvent(e);
+
+	/* dispatch 'input' event to close the current input box */
+	e = new Event("input");
+	c.dispatchEvent(e);
+}
+
+function up(c) {
+	var e;
+	var p;
+
+	// ugly magic right here
+	if((p = c.parentNode.parentNode.previousSibling.previousSibling.firstChild.nextSibling) == null) {
+		return;
+	}
+
+	/* dispatch 'click' event to open the next input box */
+	e = new Event("click");
+	p.dispatchEvent(e);
+}
+
+
+/* remove the input box and update the character */
+function stopedit() {
+	var p;
+
+	/* may be null if this has already been updated (e.g. if it's called more than once) */
+	if((p = this.parentNode) == null) {
+		return;
+	}
+	p.innerHTML = this.value;
+
+	p.addEventListener("click", edit);
+}
+
+/* ensure the whole character box is highlighted */
+function selectall(event) {
+	var a;
+
+	/* don't do this if the event was from a shifted arrow key */
+	if(event.key == "Shift" || event.shiftKey || event.keyCode == 16 &&
+	   ((event.key && event.key == "ArrowRight") ||
+	    (event.key && event.key == "ArrowLeft") ||
+	    (event.keyCode && event.keyCode == 37) ||
+	    (event.keyCode && event.keyCode == 39))) {
+		return;
+	}
+
+	a = document.getElementsByClassName("editchar");
+
+	if(a.length == 1) {
+		a[0].selectionStart = 0;
+		a[0].selectionEnd = a[0].value.length;
+	}
+
+	a[0].style.width = (a[0].value.length * 0.8) + "em";
+}
+
+/* replace the character with an input box with the character */
+function edit() {
+	var input;
+	var a;
+
+	input = document.createElement("input");
+	input.className = "editchar";
+	input.size = 1;
+	input.value = this.innerHTML;
+
+	input.addEventListener("input", edited); // bug: not triggered
+	input.addEventListener("blur", stopedit);
+	input.addEventListener("keydown", charkeys);
+	//input.addEventListener("keyup", selectall);
+
+	this.removeEventListener("click", edit);
+
+	this.innerHTML = "";
+	this.appendChild(input);
+	input.focus();
+	input.selectionStart = 0;
+	input.selectionEnd = input.value.length;
+	input.style.width = (input.value.length * 0.8) + "em";
+}
+
+function save() {
+	var hocr;
+	var e;
+
+	e = document.getElementById("save");
+	hocr = document.getElementById("hocr").innerHTML;
+
+	e.href = "data:application/octet;charset=utf-8," + encodeURIComponent(hocr);
+}
+
+function addopened(e) {
+	var a;
+	var f;
+	var hocr;
+
+	if((hocr = document.getElementById("hocr")) != null) {
+		hocr.parentNode.removeChild(hocr);
+	}
+
+	hocr = e.target.result;
+
+	f = document.getElementById("footer");
+
+	a = document.createElement("div");
+	a.id = "hocr";
+	a.innerHTML = hocr;
+	document.body.insertBefore(a, f);
+
+	readyhocr();
+}
+
+function openhocr() {
+	var a;
+	var e;
+	var r;
+
+	a = document.getElementById("open");
+
+	r = new FileReader();
+	r.onload = addopened;
+	r.readAsText(a.files[0]);
+
+	e = document.getElementById("save");
+	e.download = a.files[0].name.replace(".hocr", ".corrected.hocr");
+	document.title = a.files[0].name + " - HOCR Proofreader";
+
+	e.addEventListener("click", save);
+}
+
+/* add click listener for each hocr character */
+function readyhocr() {
+	var i;
+	var chars;
+
+	chars = document.getElementsByClassName("ocrx_word");
+	for (i = 0; i < chars.length; i++) {
+		chars[i].addEventListener("click", edit);
+	}
+}
+  </script>
+  <style>
+    @font-face { font-family: 'Junicode'; src: url('junicode.woff') format('woff'); }
+    body { font-family: 'Junicode', serif; }
+    input { font-family: 'Junicode', serif; }
+    [title*="x_wconf 0"] { background-color: #8812b0 }
+    [title*="x_wconf 1"] { background-color: #ff0400 }
+    [title*="x_wconf 2"] { background-color: #ff0800 }
+    [title*="x_wconf 3"] { background-color: #ff0c00 }
+    [title*="x_wconf 4"] { background-color: #ff1000 }
+    [title*="x_wconf 5"] { background-color: #ff1400 }
+    [title*="x_wconf 6"] { background-color: #ff1800 }
+    [title*="x_wconf 7"] { background-color: #ff1c00 }
+    [title*="x_wconf 8"] { background-color: #ff2000 }
+    [title*="x_wconf 9"] { background-color: #ff2400 }
+    [title*="x_wconf 10"] { background-color: #ff2800 }
+    [title*="x_wconf 11"] { background-color: #ff2c00 }
+    [title*="x_wconf 12"] { background-color: #ff3000 }
+    [title*="x_wconf 13"] { background-color: #ff3400 }
+    [title*="x_wconf 14"] { background-color: #ff3800 }
+    [title*="x_wconf 15"] { background-color: #ff3c00 }
+    [title*="x_wconf 16"] { background-color: #ff4000 }
+    [title*="x_wconf 17"] { background-color: #ff4400 }
+    [title*="x_wconf 18"] { background-color: #ff4800 }
+    [title*="x_wconf 19"] { background-color: #ff4c00 }
+    [title*="x_wconf 20"] { background-color: #ff5000 }
+    [title*="x_wconf 21"] { background-color: #ff5400 }
+    [title*="x_wconf 22"] { background-color: #ff5800 }
+    [title*="x_wconf 23"] { background-color: #ff5c00 }
+    [title*="x_wconf 24"] { background-color: #ff6000 }
+    [title*="x_wconf 25"] { background-color: #ff6400 }
+    [title*="x_wconf 26"] { background-color: #ff6800 }
+    [title*="x_wconf 27"] { background-color: #ff6c00 }
+    [title*="x_wconf 28"] { background-color: #ff7000 }
+    [title*="x_wconf 29"] { background-color: #ff7400 }
+    [title*="x_wconf 30"] { background-color: #ff7800 }
+    [title*="x_wconf 31"] { background-color: #ff7c00 }
+    [title*="x_wconf 32"] { background-color: #ff8000 }
+    [title*="x_wconf 33"] { background-color: #ff8400 }
+    [title*="x_wconf 34"] { background-color: #ff8800 }
+    [title*="x_wconf 35"] { background-color: #ff8c00 }
+    [title*="x_wconf 36"] { background-color: #ff9000 }
+    [title*="x_wconf 37"] { background-color: #ff9400 }
+    [title*="x_wconf 38"] { background-color: #ff9800 }
+    [title*="x_wconf 39"] { background-color: #ff9c00 }
+    [title*="x_wconf 40"] { background-color: #ffa000 }
+    [title*="x_wconf 41"] { background-color: #ffa400 }
+    [title*="x_wconf 42"] { background-color: #ffa800 }
+    [title*="x_wconf 43"] { background-color: #ffac00 }
+    [title*="x_wconf 44"] { background-color: #ffb000 }
+    [title*="x_wconf 45"] { background-color: #ffb400 }
+    [title*="x_wconf 46"] { background-color: #ffb800 }
+    [title*="x_wconf 47"] { background-color: #ffbc00 }
+    [title*="x_wconf 48"] { background-color: #ffc000 }
+    [title*="x_wconf 49"] { background-color: #ffc400 }
+    [title*="x_wconf 50"] { background-color: #ffc800 }
+    [title*="x_wconf 51"] { background-color: #fdff00 }
+    [title*="x_wconf 52"] { background-color: #fbff00 }
+    [title*="x_wconf 53"] { background-color: #f9ff00 }
+    [title*="x_wconf 54"] { background-color: #f7ff00 }
+    [title*="x_wconf 55"] { background-color: #f5ff00 }
+    [title*="x_wconf 56"] { background-color: #f3ff00 }
+    [title*="x_wconf 57"] { background-color: #f1ff00 }
+    [title*="x_wconf 58"] { background-color: #efff00 }
+    [title*="x_wconf 59"] { background-color: #edff00 }
+    [title*="x_wconf 60"] { background-color: #ebff00 }
+    [title*="x_wconf 61"] { background-color: #e9ff00 }
+    [title*="x_wconf 62"] { background-color: #e7ff00 }
+    [title*="x_wconf 63"] { background-color: #e5ff00 }
+    [title*="x_wconf 64"] { background-color: #e3ff00 }
+    [title*="x_wconf 65"] { background-color: #e1ff00 }
+    [title*="x_wconf 66"] { background-color: #dfff00 }
+    [title*="x_wconf 67"] { background-color: #ddff00 }
+    [title*="x_wconf 68"] { background-color: #dbff00 }
+    [title*="x_wconf 69"] { background-color: #d9ff00 }
+    [title*="x_wconf 70"] { background-color: #d7ff00 }
+    [title*="x_wconf 71"] { background-color: #d5ff00 }
+    [title*="x_wconf 72"] { background-color: #d3ff00 }
+    [title*="x_wconf 73"] { background-color: #d1ff00 }
+    [title*="x_wconf 74"] { background-color: #cfff00 }
+    [title*="x_wconf 75"] { background-color: #cdff00 }
+    [title*="x_wconf 76"] { background-color: #cbff00 }
+    [title*="x_wconf 77"] { background-color: #c9ff00 }
+    [title*="x_wconf 78"] { background-color: #c7ff00 }
+    [title*="x_wconf 79"] { background-color: #c5ff00 }
+    [title*="x_wconf 80"] { background-color: #c7ff00 }
+    [title*="x_wconf 81"] { background-color: #c7ff00 }
+    [title*="x_wconf 82"] { background-color: #c7ff00 }
+    [title*="x_wconf 83"] { background-color: #c7ff00 }
+    [title*="x_wconf 84"] { background-color: #c7ff00}
+    [title*="x_wconf 85"] { background-color: #c7ff00 }
+    [title*="x_wconf 86"] { background-color: #c7ff00 }
+    [title*="x_wconf 87"] { background-color: #c7ff00 }
+    [title*="x_wconf 88"] { background-color: #c7ff00 }
+    [title*="x_wconf 89"] { background-color: #c7ff00 }
+    [title*="x_wconf 90"] { background-color: #3cff00 }
+    [title*="x_wconf 91"] { background-color: #37ff00 }
+    [title*="x_wconf 92"] { background-color: #32ff00 }
+    [title*="x_wconf 93"] { background-color: #2dff00 }
+    [title*="x_wconf 94"] { background-color: #28ff00 }
+    [title*="x_wconf 95"] { background-color: #23ff00 }
+    [title*="x_wconf 96"] { background-color: #1eff00 }
+    [title*="x_wconf 97"] { background-color: #19ff00 }
+    [title*="x_wconf 98"] { background-color: #14ff00 }
+    [title*="x_wconf 99"] { background-color: #0fff00 }
+    [title*="x_wconf 100"] { background-color: #0aff00 }
+    [title*="corrected"] { background-color: #7dd0ff }
+    .ocr_line { display:block }
+  </style>
+</head>
+<body>
+
+<hr id="footer" />
+
+<input id="open" type="file" onchange="openhocr()" />
+
+<br />
+<br />
+
+<a id="save" type="file" href="">Save</a>
+
+</body>
+</html>
