@@ -15,26 +15,19 @@
  * - Show word & character recognised from image when editing a character
  */
 
-/* process the edit and update the word title to 'corrected' */
+/* update the word title to 'corrected' so it can be styled differently */
 function edited(event) {
 	var p;
 
 	/* may be null if this has already been updated (e.g. if it's called more than once) */
-	if(this.parentNode == null ||
-	   (p = this.parentNode.parentNode) == null) {
+	p = this.parentNode;
+	if(p == null) {
 		return;
 	}
 
 	if(!p.title.includes("corrected")) {
 		p.title += "; corrected";
 	}
-
-	/* Don't advance automatically if the box is large or empty */
-	if(this.value.length != 1) {
-		return;
-	}
-
-	next(this);
 }
 
 /* key handler for character edit box */
