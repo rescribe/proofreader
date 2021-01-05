@@ -42,19 +42,6 @@ function charkeys(event) {
 	/* WebKit uses deprecated keyCode, which has different semantics to key,
 	 * unfortunately. Support both for now */
 
-	if(event.shiftKey) {
-		if(event.key && event.key == "ArrowRight" ||
-		   event.keyCode && event.keyCode == 39) {
-			next(this);
-		}
-		if(event.key && event.key == "ArrowLeft" ||
-		   event.keyCode && event.keyCode == 37) {
-			prev(this);
-		}
-		return;
-	}
-
-/*
 	if(event.key && event.key == "ArrowRight" ||
 	   event.keyCode && event.keyCode == 39) {
 		next(this);
@@ -64,23 +51,16 @@ function charkeys(event) {
 	   event.keyCode && event.keyCode == 37) {
 		prev(this);
 	}
-*/
+
 	if(event.key && event.key == "ArrowDown" ||
 	   event.keyCode && event.keyCode == 40) {
 		down(this);
 	}
+
 	if(event.key && event.key == "ArrowUp" ||
 	   event.keyCode && event.keyCode == 38) {
 		up(this);
 	}
-}
-
-function nextchar(input) {
-	input.selectionStart++;
-}
-
-function prevchar(input) {
-	input.selectionStart--;
 }
 
 /* open input box for the next character and close input box for current character */
@@ -167,15 +147,24 @@ function stopedit() {
 function selectall(event) {
 	var a;
 
-	/* don't do this if the event was from a shifted arrow key */
-	if(event.key == "Shift" || event.shiftKey || event.keyCode == 16 &&
-	   ((event.key && event.key == "ArrowRight") ||
-	    (event.key && event.key == "ArrowLeft") ||
-	    (event.keyCode && event.keyCode == 37) ||
-	    (event.keyCode && event.keyCode == 39))) {
+	/* only do this if event was from an arrow key, as otherwise
+	 * we'll get in the way of editing */
+	if(event.key &&
+	   (event.key != "ArrowLeft") &&
+	   (event.key != "ArrowRight") &&
+	   (event.key != "ArrowUp") &&
+	   (event.key != "ArrowDown")) {
+		return;
+	}
+	if(event.keyCode &&
+	   (event.keyCode != 37) &&
+	   (event.keyCode != 38) &&
+	   (event.keyCode != 39) &&
+	   (event.keyCode != 40)) {
 		return;
 	}
 
+	console.log("starting selectall");
 	a = document.getElementsByClassName("editchar");
 
 	if(a.length == 1) {
@@ -196,10 +185,10 @@ function edit() {
 	input.size = 1;
 	input.value = this.innerHTML;
 
-	input.addEventListener("input", edited); // bug: not triggered
+	input.addEventListener("input", edited);
 	input.addEventListener("blur", stopedit);
 	input.addEventListener("keydown", charkeys);
-	//input.addEventListener("keyup", selectall);
+	input.addEventListener("keyup", selectall);
 
 	this.removeEventListener("click", edit);
 
