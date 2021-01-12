@@ -157,7 +157,6 @@ function selectall(event) {
 		return;
 	}
 
-	console.log("starting selectall");
 	a = document.getElementsByClassName("editchar");
 
 	if(a.length == 1) {
@@ -207,12 +206,23 @@ function addopened(e) {
 	var a;
 	var f;
 	var hocr;
+	var start;
+	var end;
 
 	if((hocr = document.getElementById("hocr")) != null) {
 		hocr.parentNode.removeChild(hocr);
 	}
 
 	hocr = e.target.result;
+
+	/* cut hocr to only that inside of <body> </body> (note it's just a string) */
+	start = hocr.indexOf("<body>") + "<body>".length
+	end = hocr.indexOf("</body>")
+	if(start == -1 || end == -1) {
+		console.log("Error: failed to find body tag in hocr")
+		return;
+	}
+	hocr = hocr.substring(start, end)
 
 	f = document.getElementById("footer");
 
