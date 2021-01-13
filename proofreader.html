@@ -7,6 +7,9 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <script>
 /* TODO:
+ * - switch to no semicolons at end of lines
+ * - update the below TODOs (they're potentially outdated)
+ *
  * - BUG: ampersands in input boxes are represented as &amp;
  * - Have the input box move to the next word when the right is pressed at the end of a word
  * - Automatically generate the hocr style; https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Using_dynamic_styling_information
@@ -252,6 +255,113 @@ function openhocr() {
 	e.addEventListener("click", save);
 }
 
+function setdir() {
+	var d;
+	var end;
+
+	window.imgdir = "";
+
+	d = document.getElementById("dir");
+
+	window.imgdir = d.value;
+	if(window.imgdir == "") {
+		end = window.location.href.lastIndexOf("/");
+		window.imgdir = window.location.href.substring(0, end);
+	}
+
+	addpageimgs();
+}
+
+function addlineimgs(page, img) {
+	return function() {
+		var c;
+		var ctx;
+		var i;
+		var lines;
+		var start;
+		var end;
+		var bbox;
+		var width;
+		var height;
+		const bbfield = {
+			"x1": 1,
+			"y1": 2,
+			"x2": 3,
+			"y2": 4,
+		};
+		const scaledown = 10;
+
+		lines = page.getElementsByClassName("ocr_line");
+		for (i = 0; i < lines.length; i++) {
+			start = lines[i].title.indexOf("bbox");
+			end = lines[i].title.indexOf(";");
+			bbox = lines[i].title.substring(start, end).split(" ");
+			width = bbox[bbfield.x2] - bbox[bbfield.x1];
+			height = bbox[bbfield.y2] - bbox[bbfield.y1];
+
+			c = document.createElement("canvas");
+			c.setAttribute('width', width/scaledown);
+			c.setAttribute('height', height/scaledown);
+			ctx = c.getContext("2d");
+			ctx.drawImage(img, bbox[bbfield.x1], bbox[bbfield.y1], width, height, 0, 0, width/scaledown, height/scaledown);
+			lines[i].parentNode.insertBefore(c, lines[i]);
+		}
+	}
+}
+
+function addpageimgs() {
+	var imgpath;
+	var imgname;
+	var pages;
+	var start;
+	var end;
+	var img;
+	var dir;
+	var canvases;
+	var i;
+	var p;
+
+	/* remove any old canvases, in case img dir has changed */
+	canvases = document.getElementsByTagName("canvas");
+	for (i = canvases.length - 1; i >= 0; i--) {
+		canvases[i].parentNode.removeChild(canvases[i]);
+	}
+
+	p = document.getElementById("imgpaths");
+	p.textContent = "";
+	p = document.getElementById("imgstatus");
+	p.textContent = "";
+
+	pages = document.getElementsByClassName("ocr_page");
+	for (i = 0; i < pages.length; i++) {
+		start = pages[i].title.indexOf('image "') + 'image "'.length;
+		end = pages[i].title.indexOf('"; bbox');
+		imgpath = pages[i].title.substring(start, end);
+
+		start = imgpath.lastIndexOf("/") + "/".length;
+		imgname = imgpath.substring(start);
+
+		/* create a hidden img element which loads and holds the page image,
+		 *    then create canvas elements to go above each .ocr_line using the bbox
+		 *    data to cut it from the hidden img. */
+		img = new Image();
+		img.addEventListener("load", addlineimgs(pages[i], img));
+		img.addEventListener("error", imgloadfailure, true);
+		img.src = window.imgdir + "/" + imgname;
+		p = document.getElementById("imgpaths");
+		if(p.textContent != "") {
+			p.textContent += ", ";
+		}
+		p.textContent += img.src;
+	}
+}
+
+function imgloadfailure(event) {
+	var p;
+	p = document.getElementById("imgstatus");
+	p.textContent = "failed to load image(s)";
+}
+
 /* add click listener for each hocr character */
 function readyhocr() {
 	var i;
@@ -261,12 +371,17 @@ function readyhocr() {
 	for (i = 0; i < chars.length; i++) {
 		chars[i].addEventListener("click", edit);
 	}
+
+	setdir();
 }
   </script>
   <style>
     @font-face { font-family: 'Junicode'; src: url('junicode.woff') format('woff'); }
     body { font-family: 'Junicode', serif; }
     input { font-family: 'Junicode', serif; }
+    .ocr_line { display: block }
+    #imgstatus { color: red }
+    #imgpaths { font-family: monospace }
     [title*="x_wconf 0"] { background-color: #8812b0 }
     [title*="x_wconf 1"] { background-color: #ff0400 }
     [title*="x_wconf 2"] { background-color: #ff0800 }
@@ -369,19 +484,25 @@ function readyhocr() {
     [title*="x_wconf 99"] { background-color: #0fff00 }
     [title*="x_wconf 100"] { background-color: #0aff00 }
     [title*="corrected"] { background-color: #7dd0ff }
-    .ocr_line { display:block }
   </style>
 </head>
 <body>
 
 <hr id="footer" />
 
-<input id="open" type="file" onchange="openhocr()" />
+<p>
+<input id="open" type="file" onchange="openhocr()" multiple />
+</p>
 
-<br />
-<br />
+<p><label for="dir">Set the image directory (if unset, will use the directory proofreader.html is in)</label>
+<input id="dir" type="text" onchange="setdir()" />
+<span id="imgstatus"></span>
+<br />Current paths used for images: <span id="imgpaths"></span>
+</p>
 
+<p>
 <a id="save" type="file" href="">Save</a>
+</p>
 
 </body>
 </html>
