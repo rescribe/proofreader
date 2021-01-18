@@ -95,7 +95,10 @@ function prev(c) {
 
 function down(c) {
 	var e;
+	var i;
+	var found;
 	var line;
+	var lines;
 	var word;
 
 	line = c.parentNode.parentNode;
@@ -103,13 +106,18 @@ function down(c) {
 		return;
 	}
 
-	line = line.nextSibling;
-	while(line != null && line.tagName != "SPAN") {
-		line = line.nextSibling;
+	lines = document.getElementsByClassName("ocr_line");
+	found = 0;
+	for(i = 0; i < lines.length; i++) {
+		if(lines[i] == line) {
+			found = 1;
+			break;
+		}
 	}
-	if(line == null) {
+	if(found == 0 || i >= lines.length - 1) {
 		return;
 	}
+	line = lines[i+1];
 
 	word = line.firstChild;
 	while(word != null && word.tagName != "SPAN") {
@@ -126,7 +134,10 @@ function down(c) {
 
 function up(c) {
 	var e;
+	var i;
+	var found;
 	var line;
+	var lines;
 	var word;
 
 	line = c.parentNode.parentNode;
@@ -134,13 +145,18 @@ function up(c) {
 		return;
 	}
 
-	line = line.previousSibling;
-	while(line != null && line.tagName != "SPAN") {
-		line = line.previousSibling;
+	lines = document.getElementsByClassName("ocr_line");
+	found = 0;
+	for(i = 0; i < lines.length; i++) {
+		if(lines[i] == line) {
+			found = 1;
+			break;
+		}
 	}
-	if(line == null) {
+	if(found == 0 || i == 0) {
 		return;
 	}
+	line = lines[i-1];
 
 	word = line.firstChild;
 	while(word != null && word.tagName != "SPAN") {
