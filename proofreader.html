@@ -248,6 +248,13 @@ function save() {
 	e = document.getElementById("save");
 	hocr = document.getElementById("hocr").innerHTML;
 
+	/* strip canvas tags that were inserted by proofreader */
+	hocr = hocr.replaceAll(/<canvas.*\/canvas>/g, "");
+
+	/* replace &quot; with ' (there may be other cases where such replacements
+	 * are necessary, or a better place to do this) */
+	hocr = hocr.replaceAll(/&quot;/g, "'");
+
 	e.href = "data:application/octet;charset=utf-8," + encodeURIComponent(hocr);
 }
 
