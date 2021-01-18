@@ -95,34 +95,64 @@ function prev(c) {
 
 function down(c) {
 	var e;
-	var p;
+	var line;
+	var word;
 
-	// ugly magic right here
-	if((p = c.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling) == null) {
+	line = c.parentNode.parentNode;
+	if(line == null) {
+		return;
+	}
+
+	line = line.nextSibling;
+	while(line != null && line.tagName != "SPAN") {
+		line = line.nextSibling;
+	}
+	if(line == null) {
+		return;
+	}
+
+	word = line.firstChild;
+	while(word != null && word.tagName != "SPAN") {
+		word = word.nextSibling;
+	}
+	if(word == null) {
 		return;
 	}
 
 	/* dispatch 'click' event to open the next input box */
 	e = new Event("click");
-	p.dispatchEvent(e);
-
-	/* dispatch 'input' event to close the current input box */
-	e = new Event("input");
-	c.dispatchEvent(e);
+	word.dispatchEvent(e);
 }
 
 function up(c) {
 	var e;
-	var p;
+	var line;
+	var word;
 
-	// ugly magic right here
-	if((p = c.parentNode.parentNode.previousSibling.previousSibling.firstChild.nextSibling) == null) {
+	line = c.parentNode.parentNode;
+	if(line == null) {
+		return;
+	}
+
+	line = line.previousSibling;
+	while(line != null && line.tagName != "SPAN") {
+		line = line.previousSibling;
+	}
+	if(line == null) {
+		return;
+	}
+
+	word = line.firstChild;
+	while(word != null && word.tagName != "SPAN") {
+		word = word.nextSibling;
+	}
+	if(word == null) {
 		return;
 	}
 
 	/* dispatch 'click' event to open the next input box */
 	e = new Event("click");
-	p.dispatchEvent(e);
+	word.dispatchEvent(e);
 }
 
 
