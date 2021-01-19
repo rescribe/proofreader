@@ -336,13 +336,15 @@ function addlineimgs(page, img) {
 		var bbox;
 		var width;
 		var height;
+		var scaledown;
 		const bbfield = {
 			"x1": 1,
 			"y1": 2,
 			"x2": 3,
 			"y2": 4,
 		};
-		const scaledown = 10;
+
+		scaledown = img.width / 800;
 
 		lines = page.getElementsByClassName("ocr_line");
 		for (i = 0; i < lines.length; i++) {
