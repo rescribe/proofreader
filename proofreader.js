@@ -1,19 +1,28 @@
 'use strict'
 
-const bbfield = {
-	"x1": 1,
-	"y1": 2,
-	"x2": 3,
-	"y2": 4,
-}
-
 function titletobbox(title) {
 	var start
 	var end
+	var fields = []
+	var bbox = {}
+
+	const bbfield = {
+		"x1": 1,
+		"y1": 2,
+		"x2": 3,
+		"y2": 4,
+	}
 
 	start = title.indexOf("bbox")
 	end = title.indexOf(";")
-	return title.substring(start, end).split(" ")
+	fields = title.substring(start, end).split(" ")
+
+	bbox.x = fields[bbfield.x1]
+	bbox.y = fields[bbfield.y1]
+	bbox.width = fields[bbfield.x2] - fields[bbfield.x1]
+	bbox.height = fields[bbfield.y2] - fields[bbfield.y1]
+
+	return bbox
 }
 
 /* update the word title to 'corrected' so it can be styled differently */
@@ -341,14 +350,12 @@ function addlineimgs(page, img) {
 		lines = page.getElementsByClassName("ocr_line")
 		for (i = 0; i < lines.length; i++) {
 			bbox = titletobbox(lines[i].title)
-			width = bbox[bbfield.x2] - bbox[bbfield.x1]
-			height = bbox[bbfield.y2] - bbox[bbfield.y1]
 
 			c = document.createElement("canvas")
-			c.setAttribute('width', width/scaledown)
-			c.setAttribute('height', height/scaledown)
+			c.setAttribute('width', bbox.width/scaledown)
+			c.setAttribute('height', bbox.height/scaledown)
 			ctx = c.getContext("2d")
-			ctx.drawImage(img, bbox[bbfield.x1], bbox[bbfield.y1], width, height, 0, 0, width/scaledown, height/scaledown)
+			ctx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, bbox.width/scaledown, bbox.height/scaledown)
 			lines[i].parentNode.insertBefore(c, lines[i])
 		}
 	}
