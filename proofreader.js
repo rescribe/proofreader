@@ -246,14 +246,16 @@ function edit() {
 
 	this.removeEventListener("click", edit)
 
-	resetlineimg(this.parentNode)
-	c = this.parentNode.previousSibling
-	ctx = c.getContext("2d")
-	linebox = titletobbox(this.parentNode.title)
-	bbox = titletobbox(this.title)
-	scaledown = c.dataset.scaledown
-	ctx.fillStyle = 'rgb(100, 190, 255, 0.5)';
-	ctx.fillRect((bbox.x - linebox.x)/scaledown, (bbox.y - linebox.y)/scaledown, bbox.width/scaledown, bbox.height/scaledown)
+	if(this.parentNode.parentNode.getElementsByTagName("canvas").length > 0) {
+		resetlineimg(this.parentNode)
+		c = this.parentNode.previousSibling
+		ctx = c.getContext("2d")
+		linebox = titletobbox(this.parentNode.title)
+		bbox = titletobbox(this.title)
+		scaledown = c.dataset.scaledown
+		ctx.fillStyle = 'rgb(100, 190, 255, 0.5)';
+		ctx.fillRect((bbox.x - linebox.x)/scaledown, (bbox.y - linebox.y)/scaledown, bbox.width/scaledown, bbox.height/scaledown)
+	}
 
 	this.innerHTML = ""
 	this.appendChild(input)
@@ -355,18 +357,19 @@ function resetlineimg(line) {
 	var imgs
 	var scaledown
 
-	c = line.previousSibling
-
 	var imgs = document.getElementsByTagName("img")
 
 	// TODO: check the parent page src to get the correct img tag
 	img = imgs[0]
 
-	scaledown = c.dataset.scaledown
+	if(line.parentNode.getElementsByTagName("canvas").length > 0) {
+		c = line.previousSibling
+		scaledown = c.dataset.scaledown
 
-	bbox = titletobbox(line.title)
-	ctx = c.getContext("2d")
-	ctx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, bbox.width/scaledown, bbox.height/scaledown)
+		bbox = titletobbox(line.title)
+		ctx = c.getContext("2d")
+		ctx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, bbox.width/scaledown, bbox.height/scaledown)
+	}
 }
 
 function addlineimgs(page, img) {
