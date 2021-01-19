@@ -1,5 +1,21 @@
 'use strict'
 
+const bbfield = {
+	"x1": 1,
+	"y1": 2,
+	"x2": 3,
+	"y2": 4,
+}
+
+function titletobbox(title) {
+	var start
+	var end
+
+	start = title.indexOf("bbox")
+	end = title.indexOf(";")
+	return title.substring(start, end).split(" ")
+}
+
 /* update the word title to 'corrected' so it can be styled differently */
 function edited(event) {
 	var p
@@ -319,20 +335,12 @@ function addlineimgs(page, img) {
 		var width
 		var height
 		var scaledown
-		const bbfield = {
-			"x1": 1,
-			"y1": 2,
-			"x2": 3,
-			"y2": 4,
-		}
 
 		scaledown = img.width / 800
 
 		lines = page.getElementsByClassName("ocr_line")
 		for (i = 0; i < lines.length; i++) {
-			start = lines[i].title.indexOf("bbox")
-			end = lines[i].title.indexOf(";")
-			bbox = lines[i].title.substring(start, end).split(" ")
+			bbox = titletobbox(lines[i].title)
 			width = bbox[bbfield.x2] - bbox[bbfield.x1]
 			height = bbox[bbfield.y2] - bbox[bbfield.y1]
 
