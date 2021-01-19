@@ -1,5 +1,7 @@
 'use strict'
 
+/* titletobbox() parses a title tag to extract the bbox, returning an
+ * object with origin coordinates, and width and height */
 function titletobbox(title) {
 	var start
 	var end
@@ -14,11 +16,15 @@ function titletobbox(title) {
 	}
 
 	start = title.indexOf("bbox")
-	end = title.indexOf(";")
-	fields = title.substring(start, end).split(" ")
+	end = title.substring(start).indexOf(";") + start
+	if(end > 0) {
+		fields = title.substring(start, end).split(" ")
+	} else {
+		fields = title.substring(start).split(" ")
+	}
 
-	bbox.x = fields[bbfield.x1]
-	bbox.y = fields[bbfield.y1]
+	bbox.x = Number(fields[bbfield.x1])
+	bbox.y = Number(fields[bbfield.y1])
 	bbox.width = fields[bbfield.x2] - fields[bbfield.x1]
 	bbox.height = fields[bbfield.y2] - fields[bbfield.y1]
 
