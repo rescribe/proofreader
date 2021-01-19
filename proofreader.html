@@ -437,6 +437,7 @@ function readyhocr() {
     .ocr_line { display: block; margin-bottom: 2ex; }
     #imgstatus { color: red }
     #imgpaths { font-family: monospace }
+    #copychars { position: fixed; right: 0px; bottom: 0px; width: 15em; height: 30ex; background-color: #eaeaea; padding: 0ex 1em 1ex 1em; border-left: 1px solid #555555; border-top: 1px solid #555555; }
     [title*="x_wconf 0"] { background-color: #8812b0 }
     [title*="x_wconf 1"] { background-color: #ff0400 }
     [title*="x_wconf 2"] { background-color: #ff0800 }
@@ -558,6 +559,11 @@ function readyhocr() {
 <p>
 <a id="save" type="file" href="">Save</a>
 </p>
+
+<div id="copychars">
+<h3>Special characters</h3>
+<p>Æ Œ æ œ ſ ß † ‡ ÷ ※ - ¶ ã õ ũ à è ì ò ù ā đ ē ę ī ĩ ĳ ō Ū ū â ê î ô û ǣ ǽ ː ⸗ ꝑ ꝓ ꝗ ꝙ ꝛ ꝝ ꝫ ꝯ ꝰ ꝶ ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ ↄ                              </p>
+</div>
 
 </body>
 </html>
