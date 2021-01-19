@@ -15,8 +15,8 @@ function edited(event) {
 	}
 }
 
-/* key handler for character edit box */
-function charkeys(event) {
+/* key handler for word edit box */
+function keyhandler(event) {
 	/* WebKit uses deprecated keyCode, which has different semantics to key,
 	 * unfortunately. Support both for now */
 
@@ -41,7 +41,7 @@ function charkeys(event) {
 	}
 }
 
-/* open input box for the next character and close input box for current character */
+/* open input box for the next word and close input box for current word */
 function next(c) {
 	var e
 	var p
@@ -59,7 +59,7 @@ function next(c) {
 	c.dispatchEvent(e)
 }
 
-/* open input box for the previous character and close input box for current character */
+/* open input box for the previous word and close input box for current word */
 function prev(c) {
 	var e
 	var p
@@ -154,7 +154,7 @@ function up(c) {
 }
 
 
-/* remove the input box and update the character */
+/* remove the input box and update the word */
 function stopedit() {
 	var p
 
@@ -167,7 +167,7 @@ function stopedit() {
 	p.addEventListener("click", edit)
 }
 
-/* ensure the whole character box is highlighted */
+/* ensure the whole word box is highlighted */
 function selectall(event) {
 	var a
 
@@ -188,7 +188,7 @@ function selectall(event) {
 		return
 	}
 
-	a = document.getElementsByClassName("editchar")
+	a = document.getElementsByClassName("editword")
 
 	if(a.length == 1) {
 		a[0].selectionStart = 0
@@ -198,19 +198,19 @@ function selectall(event) {
 	a[0].style.width = (a[0].value.length * 0.8) + "em"
 }
 
-/* replace the character with an input box with the character */
+/* replace the word with an input box with the word */
 function edit() {
 	var input
 	var a
 
 	input = document.createElement("input")
-	input.className = "editchar"
+	input.className = "editword"
 	input.size = 1
 	input.value = this.innerHTML.replace("&amp;", "&")
 
 	input.addEventListener("input", edited)
 	input.addEventListener("blur", stopedit)
-	input.addEventListener("keydown", charkeys)
+	input.addEventListener("keydown", keyhandler)
 	input.addEventListener("keyup", selectall)
 
 	this.removeEventListener("click", edit)
@@ -399,14 +399,14 @@ function imgloadfailure(event) {
 	p.textContent = "failed to load image(s)"
 }
 
-/* add click listener for each hocr character */
+/* add click listener for each hocr word */
 function readyhocr() {
 	var i
-	var chars
+	var words
 
-	chars = document.getElementsByClassName("ocrx_word")
-	for (i = 0; i < chars.length; i++) {
-		chars[i].addEventListener("click", edit)
+	words = document.getElementsByClassName("ocrx_word")
+	for (i = 0; i < words.length; i++) {
+		words[i].addEventListener("click", edit)
 	}
 
 	setdir()
