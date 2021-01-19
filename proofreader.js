@@ -78,10 +78,6 @@ function next(c) {
 	/* dispatch 'click' event to open the next input box */
 	e = new Event("click")
 	p.dispatchEvent(e)
-
-	/* dispatch 'input' event to close the current input box */
-	e = new Event("input")
-	c.dispatchEvent(e)
 }
 
 /* open input box for the previous word and close input box for current word */
@@ -94,10 +90,6 @@ function prev(c) {
 		e = new Event("click")
 		p.dispatchEvent(e)
 	}
-
-	/* dispatch 'input' event to close the current input box */
-	e = new Event("input")
-	c.dispatchEvent(e)
 }
 
 function down(c) {
@@ -189,6 +181,13 @@ function stopedit() {
 	}
 	p.innerHTML = this.value
 
+	// if no other input has been opened, then reset the line image
+	// this check needs to be done as navigating with keyboard often
+	// results in next input being created before this one is stopped
+	if(document.getElementById("hocr").getElementsByTagName("input").length == 0) {
+		resetlineimg(p.parentNode)
+	}
+
 	p.addEventListener("click", edit)
 }
 
@@ -227,6 +226,11 @@ function selectall(event) {
 function edit() {
 	var input
 	var a
+	var c
+	var ctx
+	var bbox
+	var linebox
+	var scaledown
 
 	input = document.createElement("input")
 	input.className = "editword"
@@ -239,6 +243,14 @@ function edit() {
 	input.addEventListener("keyup", selectall)
 
 	this.removeEventListener("click", edit)
+
+	resetlineimg(this.parentNode)
+	c = this.parentNode.previousSibling
+	ctx = c.getContext("2d")
+	linebox = titletobbox(this.parentNode.title)
+	bbox = titletobbox(this.title)
+	scaledown = c.dataset.scaledown
+	ctx.strokeRect((bbox.x - linebox.x)/scaledown, (bbox.y - linebox.y)/scaledown, bbox.width/scaledown, bbox.height/scaledown)
 
 	this.innerHTML = ""
 	this.appendChild(input)
@@ -332,6 +344,28 @@ function setdir() {
 	addpageimgs()
 }
 
+function resetlineimg(line) {
+	var bbox
+	var c
+	var ctx
+	var img
+	var imgs
+	var scaledown
+
+	c = line.previousSibling
+
+	var imgs = document.getElementsByTagName("img")
+
+	// TODO: check the parent page src to get the correct img tag
+	img = imgs[0]
+
+	scaledown = c.dataset.scaledown
+
+	bbox = titletobbox(line.title)
+	ctx = c.getContext("2d")
+	ctx.drawImage(img, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, bbox.width/scaledown, bbox.height/scaledown)
+}
+
 function addlineimgs(page, img) {
 	return function() {
 		var c
@@ -352,6 +386,7 @@ function addlineimgs(page, img) {
 			bbox = titletobbox(lines[i].title)
 
 			c = document.createElement("canvas")
+			c.dataset.scaledown = scaledown
 			c.setAttribute('width', bbox.width/scaledown)
 			c.setAttribute('height', bbox.height/scaledown)
 			ctx = c.getContext("2d")
@@ -397,6 +432,8 @@ function addpageimgs() {
 		 *    then create canvas elements to go above each .ocr_line using the bbox
 		 *    data to cut it from the hidden img. */
 		img = new Image()
+		img.style = 'display:none'
+		pages[i].appendChild(img)
 		img.addEventListener("load", addlineimgs(pages[i], img))
 		img.addEventListener("error", imgloadfailure, true)
 		img.src = window.imgdir + "/" + imgname
