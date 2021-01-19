@@ -72,7 +72,7 @@ function keyhandler(event) {
 	}
 }
 
-/* open input box for the next word and close input box for current word */
+/* open input box for the next word */
 function next(c) {
 	var e
 	var p
@@ -86,7 +86,7 @@ function next(c) {
 	p.dispatchEvent(e)
 }
 
-/* open input box for the previous word and close input box for current word */
+/* open input box for the previous word */
 function prev(c) {
 	var e
 	var p
@@ -98,6 +98,8 @@ function prev(c) {
 	}
 }
 
+/* open input box for the first word on the line below the one
+ * currently being edited */
 function down(c) {
 	var e
 	var i
@@ -137,6 +139,8 @@ function down(c) {
 	word.dispatchEvent(e)
 }
 
+/* open input box for the first word on the line above the one
+ * currently being edited */
 function up(c) {
 	var e
 	var i
@@ -187,11 +191,11 @@ function stopedit() {
 	}
 	p.innerHTML = this.value
 
-	// If no other input on the same line has been opened, then reset the
-	// line image. This check needs to be done as navigating with keyboard
-	// often results in next input being created (calling the edit() function
-	// which will reset and redraw the line image itself) before this one is
-	// stopped.
+	/* If no other input on the same line has been opened, then reset the
+	 * line image. This check needs to be done as navigating with keyboard
+	 * often results in next input being created (calling the edit() function
+	 * which will reset and redraw the line image itself) before this one is
+	 * stopped. */
 	if(p.parentNode.getElementsByTagName("input").length == 0) {
 		resetlineimg(p.parentNode)
 	}
@@ -271,6 +275,8 @@ function edit() {
 	input.style.width = (input.value.length * 0.8) + "em"
 }
 
+/* save the hocr, minus the <canvas> elements we added for
+ * proofreading */
 function save() {
 	var hocr
 	var e
@@ -288,6 +294,7 @@ function save() {
 	e.href = "data:application/octet;charset=utf-8," + encodeURIComponent(hocr)
 }
 
+/* add the opened hocr to the dom in a div with the id 'hocr' */
 function addopened(e) {
 	var a
 	var f
@@ -320,6 +327,7 @@ function addopened(e) {
 	readyhocr()
 }
 
+/* read the hocr file and set up handlers for it */
 function openhocr() {
 	var a
 	var e
@@ -338,6 +346,7 @@ function openhocr() {
 	e.addEventListener("click", save)
 }
 
+/* try to load an image from the given image directory */
 function setdir() {
 	var d
 	var end
@@ -355,6 +364,8 @@ function setdir() {
 	addpageimgs()
 }
 
+/* reset the canvas image above a line to its original state,
+ * removing any highlighting */
 function resetlineimg(line) {
 	var bbox
 	var c
@@ -378,6 +389,8 @@ function resetlineimg(line) {
 	}
 }
 
+/* add canvas elements above each line and draw the relevant part
+ * of the page image in them */
 function addlineimgs(page, img) {
 	return function() {
 		var c
@@ -408,6 +421,8 @@ function addlineimgs(page, img) {
 	}
 }
 
+/* load all page images into the DOM and add triggers to run
+ * addlineimgs() when loaded */
 function addpageimgs() {
 	var imgpath
 	var imgname
@@ -457,6 +472,7 @@ function addpageimgs() {
 	}
 }
 
+/* write status message to #imgstatus if an image failed to load */
 function imgloadfailure(event) {
 	var p
 	p = document.getElementById("imgstatus")
