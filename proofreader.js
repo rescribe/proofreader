@@ -1,16 +1,5 @@
 'use strict'
 
-/* TODO:
- * - update the below TODOs (they're potentially outdated)
- *
- * - BUG: ampersands in input boxes are represented as &amp
- * - Have the input box move to the next word when the right is pressed at the end of a word
- * - Automatically generate the hocr style; https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Using_dynamic_styling_information
- * - Style this generally
- * - Load image for side-by-side view
- * - Show word & character recognised from image when editing a character
- */
-
 /* update the word title to 'corrected' so it can be styled differently */
 function edited(event) {
 	var p
@@ -217,7 +206,7 @@ function edit() {
 	input = document.createElement("input")
 	input.className = "editchar"
 	input.size = 1
-	input.value = this.innerHTML
+	input.value = this.innerHTML.replace("&amp;", "&")
 
 	input.addEventListener("input", edited)
 	input.addEventListener("blur", stopedit)
