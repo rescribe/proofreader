@@ -250,7 +250,8 @@ function edit() {
 	linebox = titletobbox(this.parentNode.title)
 	bbox = titletobbox(this.title)
 	scaledown = c.dataset.scaledown
-	ctx.strokeRect((bbox.x - linebox.x)/scaledown, (bbox.y - linebox.y)/scaledown, bbox.width/scaledown, bbox.height/scaledown)
+	ctx.fillStyle = 'rgb(100, 190, 255, 0.5)';
+	ctx.fillRect((bbox.x - linebox.x)/scaledown, (bbox.y - linebox.y)/scaledown, bbox.width/scaledown, bbox.height/scaledown)
 
 	this.innerHTML = ""
 	this.appendChild(input)
