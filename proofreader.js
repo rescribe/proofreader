@@ -181,10 +181,12 @@ function stopedit() {
 	}
 	p.innerHTML = this.value
 
-	// if no other input has been opened, then reset the line image
-	// this check needs to be done as navigating with keyboard often
-	// results in next input being created before this one is stopped
-	if(document.getElementById("hocr").getElementsByTagName("input").length == 0) {
+	// If no other input on the same line has been opened, then reset the
+	// line image. This check needs to be done as navigating with keyboard
+	// often results in next input being created (calling the edit() function
+	// which will reset and redraw the line image itself) before this one is
+	// stopped.
+	if(p.parentNode.getElementsByTagName("input").length == 0) {
 		resetlineimg(p.parentNode)
 	}
 
