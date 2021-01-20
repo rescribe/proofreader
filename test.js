@@ -1,24 +1,32 @@
 /* Test the titletobbox() function */
 function testtitletobbox() {
 	var cases = [
-		{"name": "tesseract ocr_line example", "in": "bbox 559 1651 2429 1740; textangle 180; x_size 86; x_descenders 22; x_ascenders 23", "out": {x: 559, y: 1651, width: 1870, height: 89}},
-		{"name": "tesseract ocrx_word example", "in": "bbox 1936 1902 2173 1990; x_wconf 92", "out": {x: 1936, y: 1902, width: 237, height: 88}},
-		{"name": "tesseract ocr_carea example", "in": "bbox 552 560 2451 3801", "out": {x: 552, y: 560, width: 1899, height: 3241}},
-		{"name": "tesseract ocr_page example", "in": 'image "/tmp/1708_HARTSOEKER_SuiteDesConjecturesPhysiques/0032_bin0.4.png"; bbox 0 0 3456 4677; ppageno 0', "out": {x: 0, y: 0, width: 3456, height: 4677}}
+		{"name": "tesseract ocr_line example",
+		 "in": "bbox 559 1651 2429 1740; textangle 180; x_size 86; x_descenders 22; x_ascenders 23",
+		 "out": {x: 559, y: 1651, width: 1870, height: 89}},
+		{"name": "tesseract ocrx_word example",
+		 "in": "bbox 1936 1902 2173 1990; x_wconf 92",
+		 "out": {x: 1936, y: 1902, width: 237, height: 88}},
+		{"name": "tesseract ocr_carea example",
+		 "in": "bbox 552 560 2451 3801",
+		 "out": {x: 552, y: 560, width: 1899, height: 3241}},
+		{"name": "tesseract ocr_page example",
+		 "in": 'image "/tmp/t.png"; bbox 0 0 3456 4677; ppageno 0',
+		 "out": {x: 0, y: 0, width: 3456, height: 4677}}
 	]
 
-	var errors = ""
+	var err = ""
 
 	for(let i of cases) {
 		let out = titletobbox(i.in)
 		if(JSON.stringify(out) != JSON.stringify(i.out)) {
-			errors += "titletobbox(): error with " + i.name + "\n" +
-			          "               expected: " + JSON.stringify(i.out) + "\n" +
-			          "               got     : " + JSON.stringify(out) + "\n"
+			err += "titletobbox(): error in case '" + i.name + "'\n" +
+			       "               expected: " + JSON.stringify(i.out) + "\n" +
+			       "               got     : " + JSON.stringify(out) + "\n"
 		}
 	}
 
-	return errors
+	return err
 }
 
 /* Run all tests and return any errors, or an empty string if all pass */
