@@ -14,7 +14,7 @@ function testtitletobbox() {
 		if(JSON.stringify(out) != JSON.stringify(i.out)) {
 			errors += "titletobbox(): error with " + i.name + "\n" +
 			          "               expected: " + JSON.stringify(i.out) + "\n" +
-			          "               got     : " + JSON.stringify(out) + "\n\n"
+			          "               got     : " + JSON.stringify(out) + "\n"
 		}
 	}
 
@@ -28,22 +28,6 @@ function runtests() {
 	err += testtitletobbox()
 
 	return err
-}
-
-/* Runs all tests and puts results in a #results HTML element */
-function showtests() {
-	var err = ""
-
-	let results = document.getElementById('results')
-
-	err = runtests()
-	if(err != "") {
-		results.style = 'background-color: #ffcccc'
-		results.textContent = err
-	} else {
-		results.style = 'background-color: #ccffcc'
-		results.textContent = 'All tests passed'
-	}
 }
 
 var err = runtests()
