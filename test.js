@@ -45,3 +45,10 @@ function showtests() {
 		results.textContent = 'All tests passed'
 	}
 }
+
+var err = runtests()
+if(err == "") {
+	console.log("All tests passed")
+} else {
+	console.log(err)
+}
