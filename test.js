@@ -106,19 +106,23 @@ function termstart() {
 /* Run tests and print the results to a new pre element */
 function browserstart() {
 	var pre = document.createElement('pre')
-	pre.style = 'padding: 1ex 1em'
+	var pad = 'padding: 1ex 1em;'
 
 	var err = runalltests()
 	if(err == "") {
 		pre.textContent = 'All tests passed'
-		pre.style = 'background-color: #ccffcc'
+		pre.style = pad + 'background-color: #ccffcc'
 	} else {
 		pre.textContent = err
-		pre.style = 'background-color: #ffcccc'
+		pre.style = pad + 'background-color: #ffcccc'
 	}
 
 	var f = document.getElementById('footer')
 	document.body.insertBefore(pre, f)
+
+	do {
+		f.style = 'display: none'
+	} while((f = f.nextSibling) != null)
 }
 
 if(!inbrowser()) {
