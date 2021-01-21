@@ -29,18 +29,96 @@ function testtitletobbox() {
 	return err
 }
 
-/* Run all tests and return any errors, or an empty string if all pass */
-function runtests() {
+/* Runs all tests requiring DOM manipulation */
+function rundomtests(document) {
+	// TODO: load .hocr and images from testfiles/
+	// TODO: add tests here
+	return ''
+}
+
+/* Run all tests and return any errors, or an empty string if all
+ * tests pass */
+function runalltests() {
 	var err = ""
 
 	err += testtitletobbox()
+	err += domtestsetup()
 
 	return err
 }
 
-var err = runtests()
-if(err == "") {
-	console.log("All tests passed")
-} else {
-	console.log(err)
+/* If in browser, just call rundomtests(), otherwise set up the
+ * nodejs libraries jsdom and fs, load proofreader.html into a
+ * dom, and call rundomtests() with it. Returns an empty string
+ * on success, or the error message on failure. */
+function domtestsetup() {
+	if(inbrowser()) {
+		return rundomtests(document)
+	}
+
+	try {
+		var fs = require('fs')
+	} catch(e) {
+		return 'Skipping DOM tests as fs library could not be found'
+	}
+
+	try {
+		var jsdom = require('jsdom')
+	} catch(e) {
+		return 'Skipping DOM tests as jsdom library could not be found'
+	}
+
+	try {
+		var d = fs.readFileSync('proofreader.html', 'utf8')
+	} catch(e) {
+		return 'Error reading proofreader.html for DOM tests'
+	}
+
+	const { JSDOM } = jsdom
+	const { window } = new JSDOM(d)
+	return rundomtests(window.document)
+}
+
+/* Tests whether this javascript is being run from a browser */
+function inbrowser() {
+	try {
+		if(typeof document !== 'undefined') {
+			return 1
+		}
+	} catch(e) {
+	}
+
+	return 0
+}
+
+/* Run tests and print the results to the console */
+function termstart() {
+	var err = runalltests()
+	if(err == "") {
+		console.log("All tests passed")
+	} else {
+		console.log(err)
+	}
+}
+
+/* Run tests and print the results to a new pre element */
+function browserstart() {
+	var pre = document.createElement('pre')
+	pre.style = 'padding: 1ex 1em'
+
+	var err = runalltests()
+	if(err == "") {
+		pre.textContent = 'All tests passed'
+		pre.style = 'background-color: #ccffcc'
+	} else {
+		pre.textContent = err
+		pre.style = 'background-color: #ffcccc'
+	}
+
+	var f = document.getElementById('footer')
+	document.body.insertBefore(pre, f)
+}
+
+if(!inbrowser()) {
+	termstart()
 }
