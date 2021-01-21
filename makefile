@@ -16,6 +16,12 @@ proofreader-standalone.html: junicode.woff.base64 proofreader.css proofreader.ht
 	printf '</style>\n' >> $@
 	sed -n '/<\/head>/,$$p' < proofreader.html >> $@
 
+test.html: proofreader.html
+	sed -n '1,/<link/p' < proofreader.html > $@
+	printf '<script type="text/javascript" src="test.js"></script>\n' >> $@
+	printf '<script type="text/javascript">window.addEventListener("load", browserstart, false)</script>\n' >> $@
+	sed -n '/<\/head>/,$$p' < proofreader.html >> $@
+
 test:
 	cat proofreader.js test.js | js
 
