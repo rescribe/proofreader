@@ -24,9 +24,11 @@ function testtitletobbox() {
 	for(let i of cases) {
 		let got = titletobbox(i.in)
 		if(JSON.stringify(got) != JSON.stringify(i.out)) {
-			err += "titletobbox(): error in case '" + i.name + "'\n" +
-			       "               expected: " + JSON.stringify(i.out) + "\n" +
-			       "               got     : " + JSON.stringify(got) + "\n"
+			err += "✖ titletobbox(): error in case '" + i.name + "'\n" +
+			       "                expected: " + JSON.stringify(i.out) + "\n" +
+			       "                got     : " + JSON.stringify(got) + "\n"
+		} else {
+			err += "✔ titletobox() passed for '" + i.name + "'\n"
 		}
 	}
 
@@ -54,11 +56,14 @@ function testaddopened() {
 			got.carea_num = document.getElementsByClassName('ocr_carea').length
 			got.line_num = document.getElementsByClassName('ocr_line').length
 			if(JSON.stringify(got) != JSON.stringify(i.out)) {
-				err += "addopened(): error in case '" + i.name + "'\n" +
-				       "             expected: " + JSON.stringify(i.out) + "\n" +
-				       "             got     : " + JSON.stringify(got) + "\n"
+				err += "✖ addopened(): error in case '" + i.name + "'\n" +
+				       "               expected: " + JSON.stringify(i.out) + "\n" +
+				       "               got     : " + JSON.stringify(got) + "\n"
 			}
 			status(err)
+			if(err == "") {
+				status("✔ addopened() passed for '" + i.name + "'\n")
+			}
 			var hocr = document.getElementById('hocr')
 			hocr.innerHTML = ''
 		}
@@ -136,11 +141,7 @@ function setinbrowser() {
 /* Run tests and print the results with status() */
 function start() {
 	var err = runalltests()
-	if(err == "") {
-		status("All basic tests passed")
-	} else {
-		status(err)
-	}
+	status(err)
 }
 
 /* Run tests and print the results to a new pre element */
@@ -161,17 +162,19 @@ function browserstart() {
 
 /* prints status messages on console (terminal) or in browser as appropriate */
 function status(status) {
-	if(status.trim() == '') {
+	var s = status.trim()
+
+	if(s == '') {
 		return
 	}
 
 	if(!inbrowser) {
-		console.log(status)
+		console.log(s)
 		return
 	}
 
 	var pre = document.getElementById('status')
-	pre.textContent += '\n' + status
+	pre.textContent += '\n' + s
 }
 
 if(!inbrowser) {
