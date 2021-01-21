@@ -19,10 +19,11 @@ proofreader-standalone.html: junicode.woff.base64 proofreader.css proofreader.ht
 test.html: proofreader.html
 	sed -n '1,/<link/p' < proofreader.html > $@
 	printf '<script type="text/javascript" src="test.js"></script>\n' >> $@
+	printf '<script type="text/javascript" src="testdata.js"></script>\n' >> $@
 	printf '<script type="text/javascript">window.addEventListener("load", browserstart, false)</script>\n' >> $@
 	sed -n '/<\/head>/,$$p' < proofreader.html >> $@
 
 test:
-	cat proofreader.js test.js | js
+	cat proofreader.js testdata.js test.js | js
 
 .PHONY: all test

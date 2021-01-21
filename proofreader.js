@@ -458,7 +458,7 @@ function addpageimgs() {
 		/* create a hidden img element which loads and holds the page image,
 		 *    then create canvas elements to go above each .ocr_line using the bbox
 		 *    data to cut it from the hidden img. */
-		img = new Image()
+		img = new window.Image()
 		img.style = 'display:none'
 		pages[i].appendChild(img)
 		img.addEventListener("load", addlineimgs(pages[i], img))

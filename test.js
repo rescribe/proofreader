@@ -1,3 +1,7 @@
+var inbrowser = setinbrowser()
+var window
+var document
+
 /* Test the titletobbox() function */
 function testtitletobbox() {
 	var cases = [
@@ -18,22 +22,58 @@ function testtitletobbox() {
 	var err = ""
 
 	for(let i of cases) {
-		let out = titletobbox(i.in)
-		if(JSON.stringify(out) != JSON.stringify(i.out)) {
+		let got = titletobbox(i.in)
+		if(JSON.stringify(got) != JSON.stringify(i.out)) {
 			err += "titletobbox(): error in case '" + i.name + "'\n" +
 			       "               expected: " + JSON.stringify(i.out) + "\n" +
-			       "               got     : " + JSON.stringify(out) + "\n"
+			       "               got     : " + JSON.stringify(got) + "\n"
 		}
 	}
 
 	return err
 }
 
+/* Tests that addopened() adds an hocr to the DOM successfully.
+ * Note that openhocr() (which calls this in proofreader.js) can't
+ * be tested directly as the file input element can't be manipulated
+ * by javascript for security reasons. */
+function testaddopened() {
+	var cases = [
+		{"name": "hocr example 1",
+		 "in": hocr1,
+		 "out": {"carea_num": 5, "line_num": 83}}
+	]
+
+	for(let i of cases) {
+		var blob = new window.Blob([i.in])
+		var fr = new window.FileReader
+		fr.onload = function(e) {
+			addopened(e)
+			var err = ""
+			var got = {}
+			got.carea_num = document.getElementsByClassName('ocr_carea').length
+			got.line_num = document.getElementsByClassName('ocr_line').length
+			if(JSON.stringify(got) != JSON.stringify(i.out)) {
+				err += "addopened(): error in case '" + i.name + "'\n" +
+				       "             expected: " + JSON.stringify(i.out) + "\n" +
+				       "             got     : " + JSON.stringify(got) + "\n"
+			}
+			status(err)
+			var hocr = document.getElementById('hocr')
+			hocr.innerHTML = ''
+		}
+		fr.readAsText(blob)
+	}
+	return ''
+}
+
 /* Runs all tests requiring DOM manipulation */
 function rundomtests(document) {
-	// TODO: load .hocr and images from testfiles/
-	// TODO: add tests here
-	return ''
+	var err = ""
+
+	err += testaddopened()
+
+	return err
 }
 
 /* Run all tests and return any errors, or an empty string if all
@@ -52,7 +92,7 @@ function runalltests() {
  * dom, and call rundomtests() with it. Returns an empty string
  * on success, or the error message on failure. */
 function domtestsetup() {
-	if(inbrowser()) {
+	if(inbrowser) {
 		return rundomtests(document)
 	}
 
@@ -76,13 +116,13 @@ function domtestsetup() {
 		return 'Error reading proofreader.html for DOM tests'
 	}
 
-	const { JSDOM } = jsdom
-	const { window } = new JSDOM(d)
+	window = (new jsdom.JSDOM(d)).window
+	document = window.document
 	return rundomtests(window.document)
 }
 
 /* Tests whether this javascript is being run from a browser */
-function inbrowser() {
+function setinbrowser() {
 	try {
 		if(typeof document !== 'undefined') {
 			return 1
@@ -93,29 +133,21 @@ function inbrowser() {
 	return 0
 }
 
-/* Run tests and print the results to the console */
-function termstart() {
+/* Run tests and print the results with status() */
+function start() {
 	var err = runalltests()
 	if(err == "") {
-		console.log("All tests passed")
+		status("All basic tests passed")
 	} else {
-		console.log(err)
+		status(err)
 	}
 }
 
 /* Run tests and print the results to a new pre element */
 function browserstart() {
 	var pre = document.createElement('pre')
-	var pad = 'padding: 1ex 1em;'
-
-	var err = runalltests()
-	if(err == "") {
-		pre.textContent = 'All tests passed'
-		pre.style = pad + 'background-color: #ccffcc'
-	} else {
-		pre.textContent = err
-		pre.style = pad + 'background-color: #ffcccc'
-	}
+	pre.id = 'status'
+	pre.style = 'padding: 1ex 1em'
 
 	var f = document.getElementById('footer')
 	document.body.insertBefore(pre, f)
@@ -123,8 +155,25 @@ function browserstart() {
 	do {
 		f.style = 'display: none'
 	} while((f = f.nextSibling) != null)
+
+	start()
 }
 
-if(!inbrowser()) {
-	termstart()
+/* prints status messages on console (terminal) or in browser as appropriate */
+function status(status) {
+	if(status.trim() == '') {
+		return
+	}
+
+	if(!inbrowser) {
+		console.log(status)
+		return
+	}
+
+	var pre = document.getElementById('status')
+	pre.textContent += '\n' + status
+}
+
+if(!inbrowser) {
+	start()
 }
