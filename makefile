@@ -1,3 +1,7 @@
+# Copyright 2021 Nick White.
+# Use of this source code is governed by the AGPLv3
+# license that can be found in the LICENSE file.
+
 all: proofreader-standalone.html
 
 junicode.woff.base64: junicode.woff

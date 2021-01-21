@@ -1,0 +1,46 @@
+HOCR proofreader
+================
+
+This is a proofreading tool for HOCR files, primarily designed for
+the creation of quality ground truth to feed back in to an OCR
+engine.
+
+Line Images
+-----------
+
+The proof reader can load in the page images referenced in HOCR
+files and display the relevant parts of them above each line to help
+with proofreading. To do this you will need to specify the full
+path of the folder containing the page images in the "Set the image
+directory" section of the proof reader.
+
+Standalone
+----------
+
+The proofreader can optionally be bundled into one standalone .html
+file by running `make`, which will create a file called
+`proofreader-standalone.html`, which is `proofreader.html` including
+embedded copies of `proofreader.js`, `proofreader.css` and
+`junicode.woff`.
+
+Tests
+-----
+
+There is a test suite for the proofreader. It can either be run from
+a web browser, by opening `test.html`, or, if nodejs and the jsdom
+package are installed, it can be run from the command line with
+`make test`. If nodejs and jsdom aren't available `make test` can
+still be run, it will just run the subset of the tests that don't
+require DOM manipulation.
+
+Contributions
+-------------
+
+Any and all comments, bug reports, patches or pull requests would
+be very welcomely received. Please email them to <nick@rescribe.xyz>.
+
+License
+-------
+
+This software is licensed under the AGPLv3. See the LICENSE file for
+more details.
