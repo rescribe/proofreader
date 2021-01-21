@@ -59,13 +59,15 @@ function domtestsetup() {
 	try {
 		var fs = require('fs')
 	} catch(e) {
-		return 'Skipping DOM tests as fs library could not be found'
+		console.log('Skipping DOM tests as fs library could not be loaded (is nodejs installed?)')
+		return ''
 	}
 
 	try {
 		var jsdom = require('jsdom')
 	} catch(e) {
-		return 'Skipping DOM tests as jsdom library could not be found'
+		console.log('Skipping DOM tests as jsdom library could not be loaded (is node-jsdom installed?)')
+		return ''
 	}
 
 	try {
