@@ -221,8 +221,6 @@ function selectall(event) {
 		a[0].selectionStart = 0
 		a[0].selectionEnd = a[0].value.length
 	}
-
-	a[0].style.width = (a[0].value.length * 0.8) + "em"
 }
 
 /* replace the word with an input box with the word */
@@ -264,6 +262,9 @@ function edit() {
 	input.selectionStart = 0
 	input.selectionEnd = input.value.length
 	input.style.width = (input.value.length * 0.8) + "em"
+	if(input.value.length == 1) {
+		input.style.width = "2em"
+	}
 }
 
 /* save the hocr, minus the <canvas> elements we added for
