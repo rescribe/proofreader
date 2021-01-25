@@ -52,26 +52,19 @@ function edited(event) {
 
 /* key handler for word edit box */
 function keyhandler(event) {
-	/* WebKit uses deprecated keyCode, which has different semantics to key,
-	 * unfortunately. Support both for now */
-
-	if(event.key && event.key == "ArrowRight" ||
-	   event.keyCode && event.keyCode == 39) {
+	if(event.key && event.key == "ArrowRight") {
 		next(this)
 	}
 
-	if(event.key && event.key == "ArrowLeft" ||
-	   event.keyCode && event.keyCode == 37) {
+	if(event.key && event.key == "ArrowLeft") {
 		prev(this)
 	}
 
-	if(event.key && event.key == "ArrowDown" ||
-	   event.keyCode && event.keyCode == 40) {
+	if(event.key && event.key == "ArrowDown") {
 		down(this)
 	}
 
-	if(event.key && event.key == "ArrowUp" ||
-	   event.keyCode && event.keyCode == 38) {
+	if(event.key && event.key == "ArrowUp") {
 		up(this)
 	}
 }
@@ -218,13 +211,6 @@ function selectall(event) {
 	   (event.key != "ArrowRight") &&
 	   (event.key != "ArrowUp") &&
 	   (event.key != "ArrowDown")) {
-		return
-	}
-	if(event.keyCode &&
-	   (event.keyCode != 37) &&
-	   (event.keyCode != 38) &&
-	   (event.keyCode != 39) &&
-	   (event.keyCode != 40)) {
 		return
 	}
 
