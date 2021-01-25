@@ -52,11 +52,13 @@ function edited(event) {
 
 /* key handler for word edit box */
 function keyhandler(event) {
-	if(event.key && event.key == "ArrowRight") {
+	if(event.key && event.key == "Tab" && event.shiftKey == false) {
+		event.preventDefault()
 		next(this)
 	}
 
-	if(event.key && event.key == "ArrowLeft") {
+	if(event.key && event.key == "Tab" && event.shiftKey == true) {
+		event.preventDefault()
 		prev(this)
 	}
 
@@ -204,11 +206,10 @@ function stopedit() {
 function selectall(event) {
 	var a
 
-	/* only do this if event was from an arrow key, as otherwise
+	/* only do this if event was from a word movement key, as otherwise
 	 * we'll get in the way of editing */
 	if(event.key &&
-	   (event.key != "ArrowLeft") &&
-	   (event.key != "ArrowRight") &&
+	   (event.key != "Tab") &&
 	   (event.key != "ArrowUp") &&
 	   (event.key != "ArrowDown")) {
 		return
