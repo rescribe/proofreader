@@ -53,9 +53,15 @@ function titletoimgname(title) {
 	var start
 	var end
 	var path
+	var quote
 
-	start = title.indexOf('image "') + 'image "'.length
-	end = title.substring(start).indexOf('"') + start
+	quote = '"'
+	if(title.indexOf(quote) == -1) {
+		quote = "'"
+	}
+	console.log(title + " using quote: " + quote)
+	start = title.indexOf('image ' + quote) + ('image ' + quote).length
+	end = title.substring(start).indexOf(quote) + start
 	if(end > start) {
 		path = title.substring(start, end)
 	} else {
@@ -310,6 +316,9 @@ function save() {
 
 	/* strip canvas tags that were inserted by proofreader */
 	hocr = hocr.replaceAll(/<canvas.*\/canvas>/g, "")
+
+	/* strip img tags that were inserted by proofreader */
+	hocr = hocr.replaceAll(/<img.*>/g, "")
 
 	/* replace &quot; with ' (there may be other cases where such replacements
 	 * are necessary, or a better place to do this) */

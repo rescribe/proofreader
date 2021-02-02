@@ -53,6 +53,9 @@ function testtitletoimgname() {
 		{"name": "basic example",
 		 "in": "image \"/tmp/Alcoranus_test_2/0001_bin0.0.png\"",
 		 "out": "0001_bin0.0.png"},
+		{"name": "single quotes",
+		 "in": "image '/tmp/Alcoranus_test_2/0001_bin0.0.png'",
+		 "out": "0001_bin0.0.png"},
 		{"name": "bbox first",
 		 "in": "bbox 0 0 8533 13432; image \"/tmp/Alcoranus_test_2/0001_bin0.0.png\"; ppageno 0",
 		 "out": "0001_bin0.0.png"}
