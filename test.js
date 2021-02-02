@@ -41,6 +41,39 @@ function testtitletobbox() {
 	return err
 }
 
+/* Test the titletoimgname() function */
+function testtitletoimgname() {
+	var cases = [
+		{"name": "tesseract ocr_page example 1",
+		 "in": "image \"/tmp/1647_MAGNEN_PlacitaLogicae/0060_bin0.5.png\"; bbox 0 0 1881 2500; ppageno 0",
+		 "out": "0060_bin0.5.png"},
+		{"name": "tesseract ocr_page example 2",
+		 "in": "image \"/tmp/Alcoranus_test_2/0001_bin0.0.png\"; bbox 0 0 8533 13432; ppageno 0",
+		 "out": "0001_bin0.0.png"},
+		{"name": "basic example",
+		 "in": "image \"/tmp/Alcoranus_test_2/0001_bin0.0.png\"",
+		 "out": "0001_bin0.0.png"},
+		{"name": "bbox first",
+		 "in": "bbox 0 0 8533 13432; image \"/tmp/Alcoranus_test_2/0001_bin0.0.png\"; ppageno 0",
+		 "out": "0001_bin0.0.png"}
+	]
+
+	var err = ""
+
+	for(let i of cases) {
+		let got = titletoimgname(i.in)
+		if(got != i.out) {
+			err += "✖ titletoimgname(): error in case '" + i.name + "'\n" +
+			       "                    expected: " + i.out + "\n" +
+			       "                    got     : " + got + "\n"
+		} else {
+			err += "✔ titletoimgname() passed for '" + i.name + "'\n"
+		}
+	}
+
+	return err
+}
+
 /* Tests that addopened() adds an hocr to the DOM successfully.
  * Note that openhocr() (which calls this in proofreader.js) can't
  * be tested directly as the file input element can't be manipulated
@@ -93,6 +126,7 @@ function runalltests() {
 	var err = ""
 
 	err += testtitletobbox()
+	err += testtitletoimgname()
 	err += domtestsetup()
 
 	return err

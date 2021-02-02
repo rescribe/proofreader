@@ -5,7 +5,6 @@
 'use strict'
 
 /* TODO:
- * - add tests for titletoimgname()
  * - add boilerplate header and footer to saved hocr so it's fully valid
  * - set the x_wconf css rules from js rather than a massive unweildy stylesheet
  *   and add test cases for this
@@ -32,7 +31,7 @@ function titletobbox(title) {
 
 	start = title.indexOf("bbox")
 	end = title.substring(start).indexOf(";") + start
-	if(end > 0) {
+	if(end > start) {
 		fields = title.substring(start, end).split(" ")
 	} else {
 		fields = title.substring(start).split(" ")
@@ -54,8 +53,8 @@ function titletoimgname(title) {
 	var path
 
 	start = title.indexOf('image "') + 'image "'.length
-	end = title.substring(start).indexOf('";') + start
-	if(end > 0) {
+	end = title.substring(start).indexOf('"') + start
+	if(end > start) {
 		path = title.substring(start, end)
 	} else {
 		path = title.substring(start)
