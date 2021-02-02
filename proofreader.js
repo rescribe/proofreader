@@ -5,7 +5,6 @@
 'use strict'
 
 /* TODO:
- * - add boilerplate header and footer to saved hocr so it's fully valid
  * - set the x_wconf css rules from js rather than a massive unweildy stylesheet
  *   and add test cases for this
  * - add a checkbox to disable a line, which is not included when saved
@@ -13,6 +12,9 @@
  *   to use to navigate hocr reliably (e.g. to find the ocr_page that an element
  *   is in)
  */
+
+const header = "<!DOCTYPE html><head><title></title><meta name='ocr-system' content='rescribe proofreader' /></head><body>"
+const footer = "</body></html>"
 
 /* titletobbox() parses a title tag to extract the bbox, returning an
  * object with origin coordinates, and width and height */
@@ -298,7 +300,7 @@ function edit() {
 }
 
 /* save the hocr, minus the <canvas> elements we added for
- * proofreading */
+ * proofreading, and adding a basic hocr header and footer */
 function save() {
 	var hocr
 	var e
@@ -313,7 +315,10 @@ function save() {
 	 * are necessary, or a better place to do this) */
 	hocr = hocr.replaceAll(/&quot;/g, "'")
 
-	e.href = "data:application/octet;charset=utf-8," + encodeURIComponent(hocr)
+	e.href = "data:application/octet;charset=utf-8,"
+	         + encodeURIComponent(header)
+	         + encodeURIComponent(hocr)
+	         + encodeURIComponent(footer)
 }
 
 /* add the opened hocr to the dom in a div with the id 'hocr' */
