@@ -4,6 +4,17 @@
 
 'use strict'
 
+/* TODO:
+ * - add tests for titletoimgname()
+ * - add boilerplate header and footer to saved hocr so it's fully valid
+ * - set the x_wconf css rules from js rather than a massive unweildy stylesheet
+ *   and add test cases for this
+ * - add a checkbox to disable a line, which is not included when saved
+ * - create utility function to find a specific tag any level above current one,
+ *   to use to navigate hocr reliably (e.g. to find the ocr_page that an element
+ *   is in)
+ */
+
 /* titletobbox() parses a title tag to extract the bbox, returning an
  * object with origin coordinates, and width and height */
 function titletobbox(title) {
@@ -33,6 +44,26 @@ function titletobbox(title) {
 	bbox.height = fields[bbfield.y2] - fields[bbfield.y1]
 
 	return bbox
+}
+
+/* titletoimgname() parses a title tag to extract the last part
+ * of the image path */
+function titletoimgname(title) {
+	var start
+	var end
+	var path
+
+	start = title.indexOf('image "') + 'image "'.length
+	end = title.substring(start).indexOf('";') + start
+	if(end > 0) {
+		path = title.substring(start, end)
+	} else {
+		path = title.substring(start)
+	}
+
+	start = path.lastIndexOf("/") + "/".length
+
+	return path.substring(start)
 }
 
 /* update the word title to 'corrected' so it can be styled differently */
@@ -294,10 +325,6 @@ function addopened(e) {
 	var start
 	var end
 
-	if((hocr = document.getElementById("hocr")) != null) {
-		hocr.parentNode.removeChild(hocr)
-	}
-
 	hocr = e.target.result
 
 	/* cut hocr to only that inside of <body> </body> (note it's just a string) */
@@ -308,13 +335,17 @@ function addopened(e) {
 		return
 	}
 	hocr = hocr.substring(start, end)
+	/* TODO: potentially change inner ids of hocrs as they often are identical
+	 *       across different hocrs, e.g. page_1, block_1_1, etc. */
 
-	f = document.getElementById("footer")
+	if((a = document.getElementById("hocr")) == null) {
+		f = document.getElementById("footer")
+		a = document.createElement("div")
+		a.id = "hocr"
+		document.body.insertBefore(a, f)
+	}
 
-	a = document.createElement("div")
-	a.id = "hocr"
-	a.innerHTML = hocr
-	document.body.insertBefore(a, f)
+	a.innerHTML += hocr
 
 	readyhocr()
 }
@@ -326,14 +357,21 @@ function openhocr() {
 	var r
 
 	a = document.getElementById("open")
-
-	r = new FileReader()
-	r.onload = addopened
-	r.readAsText(a.files[0])
-
 	e = document.getElementById("save")
-	e.download = a.files[0].name.replace(".hocr", ".corrected.hocr")
-	document.title = a.files[0].name + " - HOCR Proofreader"
+
+	for(var i of a.files) {
+		r = new FileReader()
+		// TODO: have final onload be a closure that in addition to addopened also
+		//       adds a class to hocr div so we know that it's finished loading, so
+		//       future browse clicks can reset things. Probably.
+		r.onload = addopened
+		r.readAsText(i)
+		if(e.download != "") {
+			e.download = e.download.replace(".corrected.hocr", "") + "."
+		}
+		e.download += i.name.replace(".hocr", ".corrected.hocr")
+		document.title += " - " + i.name
+	}
 
 	e.addEventListener("click", save)
 }
@@ -364,12 +402,22 @@ function resetlineimg(line) {
 	var ctx
 	var img
 	var imgs
+	var imgname
 	var scaledown
 
-	var imgs = document.getElementsByTagName("img")
+	// TODO: make this robust by looking for a parent node that is of type ocr_page
+	imgname = titletoimgname(line.parentNode.parentNode.parentNode.title)
 
-	// TODO: check the parent page src to get the correct img tag
-	img = imgs[0]
+	imgs = document.getElementsByTagName("img")
+	for(var i of imgs) {
+		if(i.src.endsWith(imgname)) {
+			img = i
+		}
+	}
+
+	if(img == null) {
+		img = imgs[0]
+	}
 
 	if(line.parentNode.getElementsByTagName("canvas").length > 0) {
 		c = line.previousSibling
@@ -440,12 +488,7 @@ function addpageimgs() {
 
 	pages = document.getElementsByClassName("ocr_page")
 	for (i = 0; i < pages.length; i++) {
-		start = pages[i].title.indexOf('image "') + 'image "'.length
-		end = pages[i].title.indexOf('"; bbox')
-		imgpath = pages[i].title.substring(start, end)
-
-		start = imgpath.lastIndexOf("/") + "/".length
-		imgname = imgpath.substring(start)
+		imgname = titletoimgname(pages[i].title)
 
 		/* create a hidden img element which loads and holds the page image,
 		 *    then create canvas elements to go above each .ocr_line using the bbox
